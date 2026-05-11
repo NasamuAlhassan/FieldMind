@@ -77,6 +77,9 @@ with tab_dashboard:
             st.plotly_chart(issue_fig, use_container_width=True)
 
         display_columns = ["location", "issue_type", "sentiment", "urgency", "summary"]
+        missing_columns = [column for column in display_columns if column not in df.columns]
+        if missing_columns:
+            st.warning(f"Some expected fields are missing from report data: {', '.join(missing_columns)}")
         table_df = df.reindex(columns=display_columns).fillna("")
         st.dataframe(table_df, use_container_width=True)
     else:

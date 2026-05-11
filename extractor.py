@@ -21,9 +21,14 @@ def _get_model() -> genai.GenerativeModel:
 def _clean_json_text(response_text: str) -> str:
     cleaned = response_text.strip()
     if cleaned.startswith("```"):
-        cleaned = cleaned.strip("`")
+        lines = cleaned.splitlines()
+        if lines and lines[0].strip().startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        cleaned = "\n".join(lines).strip()
         if cleaned.lower().startswith("json"):
-            cleaned = cleaned[4:].strip()
+            cleaned = cleaned[len("json") :].strip()
     return cleaned
 
 
@@ -58,12 +63,8 @@ Input report:
 
     try:
         parsed = json.loads(cleaned)
-    except json.JSONDecodeError:
-        cleaned = cleaned.replace("```json", "").replace("```", "").strip()
-        try:
-            parsed = json.loads(cleaned)
-        except json.JSONDecodeError as exc:
-            raise ValueError(f"Could not parse Gemini output as JSON: {response_text}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Could not parse Gemini output as JSON: {response_text}") from exc
 
     parsed["raw_input"] = report_text
     return parsed

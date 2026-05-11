@@ -77,7 +77,8 @@ with tab_dashboard:
             st.plotly_chart(issue_fig, use_container_width=True)
 
         display_columns = ["location", "issue_type", "sentiment", "urgency", "summary"]
-        st.dataframe(df[display_columns], use_container_width=True)
+        table_df = df.reindex(columns=display_columns).fillna("")
+        st.dataframe(table_df, use_container_width=True)
     else:
         st.warning("No reports available yet. Submit a report to populate the dashboard.")
 

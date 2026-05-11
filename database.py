@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 DB_PATH = "fieldmind.db"
@@ -37,7 +37,7 @@ def init_db() -> None:
 def save_report(data: Dict[str, Any]) -> int:
     tags = data.get("tags", [])
     tags_str = ", ".join(tags) if isinstance(tags, list) else str(tags)
-    created_at = datetime.utcnow().isoformat()
+    created_at = datetime.now(timezone.utc).isoformat()
 
     with _connect() as conn:
         cursor = conn.execute(
@@ -91,7 +91,7 @@ def get_reports_by_urgency(urgency: str) -> List[Dict[str, Any]]:
 
 
 def get_recent_reports(days: int = 7) -> List[Dict[str, Any]]:
-    since = (datetime.utcnow() - timedelta(days=days)).isoformat()
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     with _connect() as conn:
         rows = conn.execute(
             "SELECT * FROM reports WHERE created_at >= ? ORDER BY datetime(created_at) DESC",
